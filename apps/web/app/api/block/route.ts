@@ -2,9 +2,17 @@ import { desktopClients } from "../../lib/clients";
 
 export const dynamic = "force-dynamic";
 
-export async function POST() {
+export async function POST(request: Request) {
+  let action = "block";
+  try {
+    const body = await request.json();
+    if (body.action === "unblock") action = "unblock";
+  } catch {
+    // default to block
+  }
+
   const encoder = new TextEncoder();
-  const message = `data: ${JSON.stringify({ type: "block" })}\n\n`;
+  const message = `data: ${JSON.stringify({ type: action })}\n\n`;
   let sent = 0;
 
   for (const [id, client] of desktopClients) {
@@ -16,5 +24,5 @@ export async function POST() {
     }
   }
 
-  return Response.json({ success: true, sent });
+  return Response.json({ success: true, action, sent });
 }

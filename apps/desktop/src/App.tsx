@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
 const SSE_URL = "http://localhost:3000/api/sse/desktop";
@@ -9,34 +10,55 @@ function App() {
   const [hostname, setHostname] = useState("");
 
   useEffect(() => {
-    // Generate a stable hostname for this instance
-    const name = `Desktop-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    setHostname(name);
+    let es: EventSource | null = null;
+    let cancelled = false;
 
-    const es = new EventSource(
-      `${SSE_URL}?hostname=${encodeURIComponent(name)}`,
-    );
-
-    es.onopen = () => {
-      setConnected(true);
-    };
-
-    es.onmessage = (event) => {
+    async function connect() {
+      // Get real PC hostname from Tauri/Rust
+      let name: string;
       try {
-        const data = JSON.parse(event.data);
-        if (data.type === "block") {
-          setIsBlocked(true);
-        }
+        name = await invoke<string>("get_hostname");
       } catch {
-        // ignore
+        name = `Desktop-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      }
+
+      if (cancelled) return;
+      setHostname(name);
+
+      es = new EventSource(`${SSE_URL}?hostname=${encodeURIComponent(name)}`);
+
+      es.onopen = () => {
+        if (!cancelled) setConnected(true);
+      };
+
+      es.onmessage = (event) => {
+        if (cancelled) return;
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "block") {
+            setIsBlocked(true);
+          } else if (data.type === "unblock") {
+            setIsBlocked(false);
+          }
+        } catch {
+          // ignore
+        }
+      };
+
+      es.onerror = () => {
+        if (!cancelled) setConnected(false);
+      };
+    }
+
+    connect();
+
+    return () => {
+      cancelled = true;
+      if (es) {
+        es.close();
+        es = null;
       }
     };
-
-    es.onerror = () => {
-      setConnected(false);
-    };
-
-    return () => es.close();
   }, []);
 
   if (isBlocked) {

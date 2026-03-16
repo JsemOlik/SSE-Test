@@ -10,7 +10,9 @@ interface ConnectedClient {
 export default function Home() {
   const [clients, setClients] = useState<ConnectedClient[]>([]);
   const [isBlocking, setIsBlocking] = useState(false);
+  const [isUnblocking, setIsUnblocking] = useState(false);
   const [blockFlash, setBlockFlash] = useState(false);
+  const [unblockFlash, setUnblockFlash] = useState(false);
 
   useEffect(() => {
     const es = new EventSource("/api/sse/web");
@@ -36,11 +38,30 @@ export default function Home() {
   async function handleBlock() {
     setIsBlocking(true);
     try {
-      await fetch("/api/block", { method: "POST" });
+      await fetch("/api/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "block" }),
+      });
       setBlockFlash(true);
       setTimeout(() => setBlockFlash(false), 600);
     } finally {
       setIsBlocking(false);
+    }
+  }
+
+  async function handleUnblock() {
+    setIsUnblocking(true);
+    try {
+      await fetch("/api/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unblock" }),
+      });
+      setUnblockFlash(true);
+      setTimeout(() => setUnblockFlash(false), 600);
+    } finally {
+      setIsUnblocking(false);
     }
   }
 
@@ -155,30 +176,53 @@ export default function Home() {
           </div>
           <div className="action-area">
             <p className="action-desc">
-              Send a <strong>Block</strong> instruction to all connected desktop
-              applications. This will lock every connected device instantly.
+              Send a <strong>Block</strong> or <strong>Unblock</strong>{" "}
+              instruction to all connected desktop applications.
             </p>
-            <button
-              id="block-button"
-              className={`block-btn ${blockFlash ? "flash" : ""}`}
-              onClick={handleBlock}
-              disabled={isBlocking || clients.length === 0}
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="action-buttons">
+              <button
+                id="block-button"
+                className={`block-btn ${blockFlash ? "flash" : ""}`}
+                onClick={handleBlock}
+                disabled={isBlocking || clients.length === 0}
               >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              {isBlocking ? "Sending…" : "Block All Devices"}
-            </button>
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                {isBlocking ? "Sending…" : "Block All"}
+              </button>
+              <button
+                id="unblock-button"
+                className={`unblock-btn ${unblockFlash ? "flash" : ""}`}
+                onClick={handleUnblock}
+                disabled={isUnblocking || clients.length === 0}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+                </svg>
+                {isUnblocking ? "Sending…" : "Unblock All"}
+              </button>
+            </div>
             {clients.length === 0 && (
               <span className="action-hint">Connect a device first</span>
             )}

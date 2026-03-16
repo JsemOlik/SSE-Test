@@ -346,12 +346,20 @@ body {
   color: var(--text);
 }
 
+/* ---------- Action Buttons ---------- */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 /* ---------- Block Button ---------- */
 .block-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 40px;
+  padding: 16px 36px;
   font-size: 1rem;
   font-weight: 700;
   font-family: var(--font);
@@ -404,6 +412,67 @@ body {
   }
   100% {
     box-shadow: 0 4px 24px var(--danger-glow);
+  }
+}
+
+/* ---------- Unblock Button ---------- */
+.unblock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font);
+  color: #fff;
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.25s,
+    opacity 0.2s;
+  box-shadow: 0 4px 24px var(--green-dim);
+  position: relative;
+  overflow: hidden;
+}
+
+.unblock-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+  border-radius: inherit;
+}
+
+.unblock-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 32px var(--green-dim);
+}
+
+.unblock-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.unblock-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.unblock-btn.flash {
+  animation: unblock-flash-anim 0.5s ease-out;
+}
+
+@keyframes unblock-flash-anim {
+  0% {
+    box-shadow: 0 0 0 0 var(--green-dim);
+  }
+  50% {
+    box-shadow: 0 0 60px 10px var(--green-dim);
+  }
+  100% {
+    box-shadow: 0 4px 24px var(--green-dim);
   }
 }
 
