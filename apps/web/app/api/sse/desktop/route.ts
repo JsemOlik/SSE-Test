@@ -21,12 +21,12 @@ export async function GET(request: Request) {
       desktopClients.set(clientId, client);
       broadcastClientList();
 
-      // Send a welcome message
+      // poslat welcome zpravu
       controller.enqueue(
         encoder.encode(`data: ${JSON.stringify({ type: "connected", hostname })}\n\n`)
       );
 
-      // Heartbeat every 15s to keep connection alive
+      // heartbeat kazdejch 15s
       const heartbeat = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(`: heartbeat\n\n`));
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
         }
       }, 15000);
 
-      // Cleanup on abort (client disconnect)
+      // uklizeni vec po odpojeni
       request.signal.addEventListener("abort", () => {
         clearInterval(heartbeat);
         desktopClients.delete(clientId);

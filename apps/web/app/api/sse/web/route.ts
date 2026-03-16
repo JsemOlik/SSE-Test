@@ -11,7 +11,7 @@ export async function GET(request: Request) {
       const client: WebClient = { controller };
       webClients.add(client);
 
-      // Send current state immediately
+      // poslat state hned
       const list = Array.from(desktopClients.values()).map((c) => ({
         hostname: c.hostname,
         connectedAt: c.connectedAt,

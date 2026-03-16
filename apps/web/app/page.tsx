@@ -24,12 +24,12 @@ export default function Home() {
           setClients(data.clients);
         }
       } catch {
-        // ignore parse errors
+        // jebat parse errory
       }
     };
 
     es.onerror = () => {
-      // EventSource will auto-reconnect
+      // EventSource dela auto-reconnect
     };
 
     return () => es.close();

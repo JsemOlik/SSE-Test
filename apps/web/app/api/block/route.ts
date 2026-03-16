@@ -8,7 +8,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     if (body.action === "unblock") action = "unblock";
   } catch {
-    // default to block
   }
 
   const encoder = new TextEncoder();
